@@ -1,5 +1,8 @@
 package supernova.util;
 
+/**
+ * {@link ViolationHandler} that handle {@link String} by {@code System.out.println(string)}.
+ */
 public class PrintViolationHandler extends ViolationHandler<String> {
 
     private String format = "Error: %s";

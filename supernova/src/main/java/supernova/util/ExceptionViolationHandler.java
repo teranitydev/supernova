@@ -1,5 +1,8 @@
 package supernova.util;
 
+/**
+ * {@link ViolationHandler} that handle {@link Exception}
+ */
 public class ExceptionViolationHandler extends ViolationHandler<Exception>{
     @Override
     public void handle(Violation<Exception> violation) {

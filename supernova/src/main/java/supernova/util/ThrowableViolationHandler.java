@@ -1,5 +1,8 @@
 package supernova.util;
 
+/**
+ * {@link ViolationHandler} that handle {@link Throwable}
+ */
 public class ThrowableViolationHandler extends ViolationHandler<Throwable> {
 
     @Override

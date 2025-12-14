@@ -3,6 +3,9 @@ package supernova.util;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A STATIC container that store {@link ViolationHandler} for each {@link Class}.
+ */
 public class ViolationHandlers {
 
     private static final Map<Class<?>, ViolationHandler<?>> HANDLERS = new HashMap<>();
@@ -27,7 +30,7 @@ public class ViolationHandlers {
     }
 
     public static ViolationHandler<?> getViolationHandler(Class<?> violationClass) {
-        ViolationHandler<?> handler = HANDLERS.get(violationClass);
+        final ViolationHandler<?> handler = HANDLERS.get(violationClass);
 
         if (handler != null) {
             return handler;

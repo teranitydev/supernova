@@ -5,16 +5,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
  * A container which may or may not contain a value, with also having violation(s).
- * When developers uses {@code of()} it will create  {@link Result} that you can add violations or value,
- * until {@link Result} stated as SUCCEED which you can state it to success by setting the value.
- * Otherwise, when developers use either {@code success()} or {@code violations{}},
+ * When developers use either {@code success()} or {@code violations{}},
  * it will create {@link Result} that stated either success or violated that you cannot set new
  * value or violate.
+ *
+ * <p>Developers also can create builder of {@link Result} by using {@code Result.builder()}
+ * and returns {@link ResultBuilder}
  *
  * <p>If {@code T} is present it means {@link Result} of an operation is succeeded,
  * otherwise, if {@link Result} have violation(s) it means operation is failed.
@@ -38,7 +38,7 @@ public class Result<T> {
     /**
      * The instance of the value reference.
      */
-    private T value;
+    private final T value;
 
     /**
      * The default constructor of {@link Result}.
@@ -83,8 +83,15 @@ public class Result<T> {
     /**
      * Returns {@link Result} with containing {@link Class} type of the value.
      */
-    public static <T> Result<T> of() {
-        return new Result<>(null, new ArrayList<>());
+    public static <T> Result<T> of(T value, List<Violation<?>> violations) {
+        return new Result<>(value, violations);
+    }
+
+    /**
+     * Returns Builder of {@link Result}
+     */
+    public static <T> ResultBuilder<T> builder() {
+        return new ResultBuilder<>(new ArrayList<>(), null);
     }
 
     /**
@@ -120,94 +127,6 @@ public class Result<T> {
             if (violation.value().equals(violationValue)) return true;
         }
         return false;
-    }
-
-    /**
-     * Setter for {@code T} value.
-     *
-     * @param value the type of value
-     */
-    public void value(T value) {
-        Objects.requireNonNull(value);
-
-        if (this.value != null) throw new IllegalStateException("Cannot set new value for Result because Result already stated as successful");
-
-        this.value = value;
-    }
-
-    /**
-     * Set new value if the condition is true.
-     */
-    public void valueIf(boolean condition, T value) {
-        Objects.requireNonNull(value);
-
-        if (condition) {
-            value(value);
-        }
-    }
-
-    /**
-     * Set new value if {@link Supplier} conditional check is true.
-     */
-    public void valueIf(Supplier<Boolean> condition, T value) {
-        Objects.requireNonNull(value);
-        Objects.requireNonNull(condition);
-
-        valueIf(condition.get(), value);
-    }
-
-    /**
-     * Violate the {@link Result} with {@code E} violation, which means the {@link Result} of the operation
-     * is failed.
-     *
-     * @param violationValue the type of violation value
-     */
-    public <E> void violate(E violationValue) {
-        Objects.requireNonNull(violationValue);
-
-        for (Violation<?> violation : violations) {
-            if (violation.value().equals(violationValue)) {
-                return;
-            }
-        }
-
-        if (value != null) {
-            throw new IllegalStateException("Cannot violate Result because Result already stated as successful");
-        }
-
-        Violation<E> violation = new Violation<>(violationValue);
-        violations.add(violation);
-    }
-
-    /**
-     * Violate the {@link Result} with conditional check and {@code E} violation.
-     *
-     * @param condition the condition of the violation,
-     *                  true - violation
-     *                  false - not violation
-     * @param violationValue the type of violation value
-     */
-    public <E> void violateIf(boolean condition, E violationValue) {
-        Objects.requireNonNull(violationValue);
-
-        if (condition) {
-            violate(violationValue);
-        }
-    }
-
-    /**
-     * Violate the {@link Result} with conditional check of {@link Supplier} and {@code E} violation.
-     *
-     * @param condition the condition of the violation,
-     *                  true - violation
-     *                  false - not violation
-     * @param violationValue the type of violation value
-     */
-    public <E> void violateIf(Supplier<Boolean> condition, E violationValue) {
-        Objects.requireNonNull(violationValue);
-        Objects.requireNonNull(condition);
-
-        violateIf(condition.get(), violationValue);
     }
 
     /**

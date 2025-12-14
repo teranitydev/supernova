@@ -1,5 +1,7 @@
 package supernova.util;
 
+import supernova.redis.RedisConnection;
+
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Consumer;

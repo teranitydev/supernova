@@ -9,11 +9,15 @@ public interface RedisConnection {
 
     PacketSerializer getPacketSerializer();
 
-    void setPacketSerializer(PacketSerializer packetSerializer);
+    Map<String, CompletableFuture<RedisPacket>> getPendingResponses();
 
     Result<Void> publishPacket(RedisPacket redisPacket, long timeout);
 
-    Result<Void> publishPacket(RedisPacket redisPacket, String responseChannel, ResponseCallback response, long timeout);
+    Result<Void> publishPacket(RedisPacket redisPacket, ResponseCallback response, long timeout);
 
-    Map<String, CompletableFuture<RedisPacket>> getPendingResponses();
+    <T extends RedisPacket> void registerHandler(Class<T> packetClass, PacketHandler handler);
+
+    void subscribe(String channelName);
+
+    void unsubscribe(String channelName);
 }

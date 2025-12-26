@@ -5,6 +5,9 @@ import supernova.util.Result;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * @since 0.0.3
+ */
 public interface RedisConnection {
 
     PacketSerializer getPacketSerializer();

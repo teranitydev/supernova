@@ -58,7 +58,7 @@ public class Result<T> {
      * @param <T> the type of the value
      */
     public static <T> Result<T> success(T value) {
-        return new Result<>(Objects.requireNonNull(value), Collections.emptyList());
+        return new Result<>(value, Collections.emptyList());
     }
 
     /**

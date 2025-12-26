@@ -2,6 +2,8 @@ package supernova.redis;
 
 /**
  * Simple Redis Packet Serializer interface.
+ *
+ * @since 0.0.3
  */
 public interface PacketSerializer {
 

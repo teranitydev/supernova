@@ -6,7 +6,7 @@ import supernova.redis.PacketSerializer;
 /**
  * Gson (JSON) Redis Packet Serializer.
  */
-public class GsonSerializer implements PacketSerializer {
+public class GsonRedisSerializer implements PacketSerializer {
 
     private final Gson GSON = new Gson();
 

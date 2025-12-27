@@ -10,11 +10,13 @@ public class ViolationHandlers {
 
     private static final Map<Class<?>, ViolationHandler<?>> HANDLERS = new HashMap<>();
 
+    // Supernova Default Violation Handlers
     static {
         HANDLERS.put(String.class, new PrintViolationHandler());
         HANDLERS.put(Exception.class, new ExceptionViolationHandler());
         HANDLERS.put(Throwable.class, new ThrowableViolationHandler());
     }
+
 
     public static void addHandler(Class<?> classType, ViolationHandler<?> violationHandler) {
         if (HANDLERS.containsKey(classType)) return;

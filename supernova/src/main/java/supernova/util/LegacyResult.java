@@ -12,6 +12,9 @@ import java.util.stream.Stream;
  *
  * @param <T> the type of reference result
  * @param <E> the type of violation or error
+ *
+ * @author Izhar Atharzi
+ * @since 0.0.1
  */
 public class LegacyResult<T, E> {
 

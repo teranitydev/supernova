@@ -6,7 +6,7 @@
 
     <groupId>net.teranity.supernova</groupId>
     <artifactId>supernova-parent</artifactId>
-    <version>0.0.4-SNAPSHOT</version>
+    <version>0.0.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -20,31 +20,6 @@
         <maven.compiler.target>22</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.1</version>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.5.0</version>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <doctitle>Supernova</doctitle>
-                    <destDir>${project.build.directory}/docs</destDir>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
 
     <profiles>
         <profile>

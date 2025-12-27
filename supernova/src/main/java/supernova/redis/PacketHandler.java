@@ -3,6 +3,7 @@ package supernova.redis;
 /**
  * A handler which handle {@link RedisPacket}.
  *
+ * @author Izhar Atharzi
  * @since 0.0.3
  */
 public interface PacketHandler {

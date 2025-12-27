@@ -6,7 +6,7 @@
     <parent>
         <groupId>net.teranity.supernova</groupId>
         <artifactId>supernova-parent</artifactId>
-        <version>0.0.4-SNAPSHOT</version>
+        <version>0.0.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>supernova-gson</artifactId>
@@ -50,7 +50,7 @@
         <dependency>
             <groupId>net.teranity.supernova</groupId>
             <artifactId>supernova</artifactId>
-            <version>0.0.4-SNAPSHOT</version>
+            <version>0.0.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>

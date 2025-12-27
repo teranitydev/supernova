@@ -1,9 +1,7 @@
 package supernova.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -68,30 +66,38 @@ public class Result<T> {
      * @return An {@link Result} with violation
      * @param <T> the type of the value
      */
-    public static <T> Result<T> violation(Violation<?> violation) {
-        return new Result<>(null, List.of(violation));
+    public static <T, E> Result<T> violation(E violation) {
+        return violations(List.of(violation));
     }
 
-    public static <T> Result<T> violations(Violation<?>... violations) {
-        return new Result<>(null, List.of(violations));
+    @SafeVarargs
+    public static <T, E> Result<T> violations(E... violations) {
+        return violations(Arrays.asList(violations));
     }
 
-    public static <T> Result<T> violations(List<Violation<?>> violations) {
-        return new Result<>(null, List.copyOf(violations));
+    public static <T, E> Result<T> violations(List<E> violations) {
+        Objects.requireNonNull(violations, "violations list cannot be null");
+
+        final List<Violation<?>> violationsList = new ArrayList<>();
+        for (E violation : violations) {
+            violationsList.add(new Violation<>(violation));
+        }
+
+        return new Result<>(null, Collections.unmodifiableList(violationsList));
     }
 
     /**
      * Returns {@link Result} with containing {@link Class} type of the value.
      */
     public static <T> Result<T> of(T value, List<Violation<?>> violations) {
-        return new Result<>(value, violations);
+        return new Result<>(value, Collections.unmodifiableList(violations));
     }
 
     /**
      * Returns Builder of {@link Result}
      */
     public static <T> ResultBuilder<T> builder() {
-        return new ResultBuilder<>(new ArrayList<>(), null);
+        return new ResultBuilder<>(new CopyOnWriteArrayList<>(), null);
     }
 
     /**
@@ -99,7 +105,7 @@ public class Result<T> {
      * <p>
      * Returns {@code true} if reference is present, and returns {@code false} if violation is present
      */
-    public boolean isSucceed() {
+    public boolean isSuccessful() {
         return violations.isEmpty() && value != null;
     }
 
@@ -108,7 +114,7 @@ public class Result<T> {
      * <p>
      * Returns {@code true} if violation is present, and returns {@code false} is reference is present
      */
-    public boolean hasViolation() {
+    public boolean hasViolations() {
         return !violations.isEmpty();
     }
 
@@ -123,10 +129,7 @@ public class Result<T> {
 
         if (violations.isEmpty()) return false;
 
-        for (Violation<?> violation : violations) {
-            if (violation.value().equals(violationValue)) return true;
-        }
-        return false;
+        return violations.stream().anyMatch(violation -> violation.value().equals(violationValue));
     }
 
     /**
@@ -134,7 +137,7 @@ public class Result<T> {
      * perform nothing.
      */
     public void ifSuccess(Consumer<T> action) {
-        if (isSucceed()) action.accept(value);
+        if (isSuccessful()) action.accept(value);
     }
 
     /**
@@ -142,14 +145,14 @@ public class Result<T> {
      * perform nothing.
      */
     public void ifViolated(Consumer<List<Violation<?>>> action) {
-        if (hasViolation()) action.accept(violations);
+        if (hasViolations()) action.accept(violations);
     }
 
     /**
      * If {@link Result} is success then returns {@link Stream} containing {@link T} reference.
      */
     public Stream<T> stream() {
-        if (isSucceed()) {
+        if (isSuccessful()) {
             return Stream.of(value);
         } else {
             return Stream.empty();
@@ -159,9 +162,9 @@ public class Result<T> {
     /**
      * If {@link Result} is failed then returns {@link Stream} containing violations.
      */
-    public Stream<List<Violation<?>>> streamViolation() {
-        if (!isSucceed()) {
-            return Stream.of(violations);
+    public Stream<Violation<?>> streamViolations() {
+        if (!isSuccessful()) {
+            return violations.stream();
         } else {
             return Stream.empty();
         }
@@ -173,12 +176,30 @@ public class Result<T> {
      * @return the value
      */
     public T get() {
-        if (!isSucceed()) {
+        if (!isSuccessful()) {
             for (Violation<?> violation : violations) {
                 handleViolation(violation);
             }
+
+            return null;
         }
         return value;
+    }
+
+    /**
+     * If the {@link Result} is success the returns {@code T}, otherwise returns other value
+     *
+     * @param otherwise The other value if the {@link Result} returns null / failed
+     * @return Either {@link Result} {@code T} or other value
+     */
+    public T orElse(T otherwise) {
+        if (isSuccessful()) {
+            return value;
+        } else {
+            Objects.requireNonNull(otherwise);
+
+            return otherwise;
+        }
     }
 
     /**
@@ -196,7 +217,7 @@ public class Result<T> {
         if (violationHandler != null) {
             violationHandler.handle(violation);
         } else {
-            System.out.println("Can't find violation handler for class type: " + violation.value().getClass());
+            throw new ViolationHandlerNotFoundException("Can't find violation handler for class type: " + violation.value().getClass());
         }
     }
 

@@ -13,7 +13,7 @@ public class ResultBuilder<T> {
 
     private T value;
 
-    public ResultBuilder(List<Violation<?>> violations, T value) {
+    ResultBuilder(List<Violation<?>> violations, T value) {
         this.violations = violations;
         this.value = value;
     }

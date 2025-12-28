@@ -171,17 +171,14 @@ public class Result<T> {
     }
 
     /**
-     * If the {@link Result} is success then returns {@code T}, otherwise violation(s).
+     * If the {@link Result} is success then returns {@code T}, otherwise throws
+     * {@link IllegalStateException}
      *
      * @return the value
      */
     public T get() {
         if (!isSuccessful()) {
-            for (Violation<?> violation : violations) {
-                handleViolation(violation);
-            }
-
-            return null;
+            throw new IllegalStateException("Result is violated");
         }
         return value;
     }

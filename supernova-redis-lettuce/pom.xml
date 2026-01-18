@@ -50,12 +50,12 @@
         <dependency>
             <groupId>net.teranity.supernova</groupId>
             <artifactId>supernova</artifactId>
-            <version>0.0.6-SNAPSHOT</version>
+            <version>0.0.7-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>net.teranity.supernova</groupId>
             <artifactId>supernova-gson</artifactId>
-            <version>0.0.6-SNAPSHOT</version>
+            <version>0.0.7-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.lettuce</groupId>

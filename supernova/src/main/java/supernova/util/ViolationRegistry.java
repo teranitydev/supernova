@@ -1,14 +1,14 @@
 package supernova.util;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A STATIC container that store {@link ViolationHandler} for each {@link Class}.
  */
-public class ViolationHandlers {
+public class ViolationRegistry {
 
-    private static final Map<Class<?>, ViolationHandler<?>> HANDLERS = new HashMap<>();
+    private static final Map<Class<?>, ViolationHandler<?>> HANDLERS = new ConcurrentHashMap<>();
 
     // Supernova Default Violation Handlers
     static {

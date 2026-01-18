@@ -1,7 +1,6 @@
 package supernova.util;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -97,7 +96,7 @@ public class Result<T> {
      * Returns Builder of {@link Result}
      */
     public static <T> ResultBuilder<T> builder() {
-        return new ResultBuilder<>(new CopyOnWriteArrayList<>(), null);
+        return new ResultBuilder<>(new ArrayList<>(), null);
     }
 
     /**
@@ -106,7 +105,7 @@ public class Result<T> {
      * Returns {@code true} if reference is present, and returns {@code false} if violation is present
      */
     public boolean isSuccessful() {
-        return violations.isEmpty() && value != null;
+        return violations.isEmpty();
     }
 
     /**
@@ -184,7 +183,7 @@ public class Result<T> {
     }
 
     /**
-     * If the {@link Result} is success the returns {@code T}, otherwise returns other value
+     * If the {@link Result} is success then returns {@code T}, otherwise returns other value
      *
      * @param otherwise The other value if the {@link Result} returns null / failed
      * @return Either {@link Result} {@code T} or other value
@@ -200,6 +199,24 @@ public class Result<T> {
     }
 
     /**
+     * If the {@link Result} is success then returns {@code T}, otherwise process and
+     * handle all the violations.
+     *
+     * @return Returns {@code T} if successful
+     */
+    public T orElseProcess() {
+        if (!isSuccessful()) {
+            streamViolations().forEach(this::handleViolation);
+            return null;
+        }
+        return value;
+    }
+
+    public void process() {
+        streamViolations().forEach(this::handleViolation);
+    }
+
+    /**
      * @return Returns immutable {@link List} of {@link Object} violation
      */
     public List<Violation<?>> getViolations() {
@@ -207,23 +224,14 @@ public class Result<T> {
     }
 
     @SuppressWarnings("unchecked")
-    private <V> void handleViolation(Violation<V> violation) {
+    private  <V> void handleViolation(Violation<V> violation) {
         final ViolationHandler<V> violationHandler =
-                (ViolationHandler<V>) ViolationHandlers.getViolationHandler(violation.value().getClass());
+                (ViolationHandler<V>) ViolationRegistry.getViolationHandler(violation.value().getClass());
 
         if (violationHandler != null) {
             violationHandler.handle(violation);
         } else {
             throw new ViolationHandlerNotFoundException("Can't find violation handler for class type: " + violation.value().getClass());
-        }
-    }
-
-    /**
-     * Handles all violations.
-     */
-    public void handleViolations() {
-        for (Violation<?> violation : violations) {
-            handleViolation(violation);
         }
     }
 

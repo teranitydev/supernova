@@ -48,6 +48,15 @@ public class Result<T> {
     }
 
     /**
+     * Returns {@link Result} for {@code void}-type.
+     *
+     * @return An empty {@link Result}
+     */
+    public static Result<Void> success() {
+        return new Result<>(null, Collections.emptyList());
+    }
+
+    /**
      * Returns {@link Result} containing the value.
      *
      * @param value the type of the value reference

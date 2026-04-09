@@ -4,15 +4,15 @@ package supernova.util;
  * {@link ViolationHandler} that handle {@link Exception}
  */
 public class ExceptionViolationHandler extends ViolationHandler<Exception>{
+
     @Override
     public void handle(Violation<Exception> violation) {
-        try {
-            throw violation.value();
-        } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
-            throw new RuntimeException(e);
+        Exception e = violation.value();
+
+        if (e instanceof RuntimeException runtime) {
+            throw runtime;
         }
+
+        throw new RuntimeException("Violation triggered an exception: " + e.getMessage(), e);
     }
 }

@@ -17,7 +17,6 @@ public class ViolationRegistry {
         HANDLERS.put(Throwable.class, new ThrowableViolationHandler());
     }
 
-
     public static void addHandler(Class<?> classType, ViolationHandler<?> violationHandler) {
         if (HANDLERS.containsKey(classType)) return;
 
@@ -32,20 +31,19 @@ public class ViolationRegistry {
     }
 
     public static ViolationHandler<?> getViolationHandler(Class<?> violationClass) {
-        final ViolationHandler<?> handler = HANDLERS.get(violationClass);
-
-        if (handler != null) {
-            return handler;
-        }
+        ViolationHandler<?> handler = HANDLERS.get(violationClass);
+        if (handler != null) return handler;
 
         if (Exception.class.isAssignableFrom(violationClass)) {
-            return HANDLERS.get(Exception.class);
+            handler = HANDLERS.get(Exception.class);
+        } else if (Throwable.class.isAssignableFrom(violationClass)) {
+            handler = HANDLERS.get(Throwable.class);
         }
 
-        if (Throwable.class.isAssignableFrom(violationClass)) {
-            return HANDLERS.get(Throwable.class);
+        if (handler != null) {
+            HANDLERS.put(violationClass, handler);
         }
 
-        return null;
+        return handler;
     }
 }

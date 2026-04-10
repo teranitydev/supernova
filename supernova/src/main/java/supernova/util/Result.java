@@ -13,12 +13,12 @@ import java.util.stream.Stream;
  * <p>Developers also can create builder of {@link Result} by using {@code Result.builder()}
  * and returns {@link ResultBuilder}
  *
- * <p>If {@code T} is present it means {@link Result} of an operation is succeeded,
+ * <p>If {@link Result} have violation(s) it means operation is succeeded,
  * otherwise, if {@link Result} have violation(s) it means operation is failed.
  *
- * <p>Success {@link Result} would require NO violations at all.
+ * <p>Success {@link Result} would require NO violations at all, and can have nullable value.
  *
- * <p>Violation(s) or also called error(s) can be {@link String} of error message, {@link Exception}, etc.
+ * <p>Violation(s) or also called error(s) can be {@link String} of error message, custom object, etc.
  *
  * @param <T> the type of the value
  * @author Izhar Atharzi
@@ -30,7 +30,7 @@ public class Result<T> {
      * The instance container that containing {@link Class} type of violation and
      * the violation value itself.
      */
-    private final List<Violation<?>> violations;
+    private final List<Violation> violations;
 
     /**
      * The instance of the value reference.
@@ -42,7 +42,7 @@ public class Result<T> {
      *
      * @param value the type of the value reference
      */
-    private Result(T value, List<Violation<?>> violations) {
+    private Result(T value, List<Violation> violations) {
         this.value = value;
         this.violations = violations;
     }
@@ -74,30 +74,24 @@ public class Result<T> {
      * @return An {@link Result} with violation
      * @param <T> the type of the value
      */
-    public static <T, E> Result<T> violation(E violation) {
+    public static <T> Result<T> violation(Violation violation) {
         return violations(List.of(violation));
     }
 
     @SafeVarargs
-    public static <T, E> Result<T> violations(E... violations) {
+    public static <T> Result<T> violations(Violation... violations) {
         return violations(Arrays.asList(violations));
     }
 
-    public static <T, E> Result<T> violations(List<E> violations) {
+    public static <T> Result<T> violations(List<Violation> violations) {
         Objects.requireNonNull(violations, "violations list cannot be null");
-
-        final List<Violation<?>> violationsList = new ArrayList<>();
-        for (E violation : violations) {
-            violationsList.add(new Violation<>(violation));
-        }
-
-        return new Result<>(null, Collections.unmodifiableList(violationsList));
+        return new Result<>(null, Collections.unmodifiableList(violations));
     }
 
     /**
      * Returns {@link Result} with containing {@link Class} type of the value.
      */
-    public static <T> Result<T> of(T value, List<Violation<?>> violations) {
+    public static <T> Result<T> of(T value, List<Violation> violations) {
         return new Result<>(value, Collections.unmodifiableList(violations));
     }
 
@@ -111,7 +105,7 @@ public class Result<T> {
     /**
      * Checks if the {@link Result} is succeeded.
      * <p>
-     * Returns {@code true} if reference is present, and returns {@code false} if violation is present
+     * Returns {@code true} if {@link Result} have no violation(s), and returns {@code false} if violation is present
      */
     public boolean isSuccessful() {
         return violations.isEmpty();
@@ -120,7 +114,7 @@ public class Result<T> {
     /**
      * Checks if the {@link Result} is violation
      * <p>
-     * Returns {@code true} if violation is present, and returns {@code false} is reference is present
+     * Returns {@code true} if violation(s) is present, and returns {@code false} is no violation(s) is present
      */
     public boolean hasViolations() {
         return !violations.isEmpty();
@@ -137,7 +131,7 @@ public class Result<T> {
 
         if (violations.isEmpty()) return false;
 
-        return violations.stream().anyMatch(violation -> violation.value().equals(violationValue));
+        return violations.stream().anyMatch(violation -> violation.equals(violationValue));
     }
 
     /**
@@ -152,7 +146,7 @@ public class Result<T> {
      * If {@link Result} is failed then performs the given action with the violation, otherwise
      * perform nothing.
      */
-    public void ifViolated(Consumer<List<Violation<?>>> action) {
+    public void ifViolated(Consumer<List<Violation>> action) {
         if (hasViolations()) action.accept(violations);
     }
 
@@ -170,7 +164,7 @@ public class Result<T> {
     /**
      * If {@link Result} is failed then returns {@link Stream} containing violations.
      */
-    public Stream<Violation<?>> streamViolations() {
+    public Stream<Violation> streamViolations() {
         if (!isSuccessful()) {
             return violations.stream();
         } else {
@@ -186,7 +180,8 @@ public class Result<T> {
      */
     public T get() {
         if (!isSuccessful()) {
-            throw new IllegalStateException("Result is violated");
+            process();
+            return null;
         }
         return value;
     }
@@ -208,39 +203,21 @@ public class Result<T> {
     }
 
     /**
-     * If the {@link Result} is success then returns {@code T}, otherwise process and
-     * handle all the violations.
-     *
-     * @return Returns {@code T} if successful
-     */
-    public T orElseProcess() {
-        if (!isSuccessful()) {
-            streamViolations().forEach(this::handleViolation);
-            return null;
-        }
-        return value;
-    }
-
-    public void process() {
-        streamViolations().forEach(this::handleViolation);
-    }
-
-    /**
      * @return Returns immutable {@link List} of {@link Object} violation
      */
-    public List<Violation<?>> getViolations() {
+    public List<Violation> getViolations() {
         return Collections.unmodifiableList(violations);
     }
 
-    @SuppressWarnings("unchecked")
-    private  <V> void handleViolation(Violation<V> violation) {
-        final ViolationHandler<V> violationHandler =
-                (ViolationHandler<V>) ViolationRegistry.getViolationHandler(violation.value().getClass());
+    private void process() {
+        if (!hasViolations()) return;
 
-        if (violationHandler != null) {
-            violationHandler.handle(violation);
+        final ViolationHandler handler = ViolationHandler.getHandler();
+
+        if (getViolations().size() == 1) {
+            handler.handle(getViolations().getFirst());
         } else {
-            throw new ViolationHandlerNotFoundException("Can't find violation handler for class type: " + violation.value().getClass());
+            handler.handle(getViolations());
         }
     }
 

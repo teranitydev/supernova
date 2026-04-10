@@ -1,18 +1,21 @@
 package supernova.util;
 
-/**
- * {@link ViolationHandler} that handle {@link Exception}
- */
-public class ExceptionViolationHandler extends ViolationHandler<Exception>{
+import java.util.ArrayList;
+import java.util.List;
+
+public class ExceptionViolationHandler extends ViolationHandler {
 
     @Override
-    public void handle(Violation<Exception> violation) {
-        Exception e = violation.value();
+    public void handle(Violation violation) {
+        throw new ViolationException(violation.getMessage());
+    }
 
-        if (e instanceof RuntimeException runtime) {
-            throw runtime;
+    @Override
+    public void handle(List<Violation> violations) {
+        List<String> messages = new ArrayList<>();
+        for (Violation violation : violations) {
+            messages.add(violation.getMessage());
         }
-
-        throw new RuntimeException("Violation triggered an exception: " + e.getMessage(), e);
+        throw new ViolationException(messages.toString());
     }
 }

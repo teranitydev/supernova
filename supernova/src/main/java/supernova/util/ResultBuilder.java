@@ -9,11 +9,11 @@ import java.util.function.Supplier;
  */
 public class ResultBuilder<T> {
 
-    private final List<Violation<?>> violations;
+    private final List<Violation> violations;
 
     private T value;
 
-    ResultBuilder(List<Violation<?>> violations, T value) {
+    ResultBuilder(List<Violation> violations, T value) {
         this.violations = violations;
         this.value = value;
     }
@@ -24,10 +24,6 @@ public class ResultBuilder<T> {
      * @param value the type of value
      */
     public void value(T value) {
-        Objects.requireNonNull(value);
-
-        if (this.value != null) throw new IllegalStateException("Cannot set new value for Result because Result already stated as successful");
-
         this.value = value;
     }
 
@@ -56,22 +52,17 @@ public class ResultBuilder<T> {
      * Violate the {@link Result} with {@code E} violation, which means the {@link Result} of the operation
      * is failed.
      *
-     * @param violationValue the type of violation value
+     * @param violation the type of violation value
      */
-    public <E> void violate(E violationValue) {
-        Objects.requireNonNull(violationValue);
+    public <E extends Violation> void violate(E violation) {
+        Objects.requireNonNull(violation);
 
-        for (Violation<?> violation : violations) {
-            if (violation.value().equals(violationValue)) {
-                return;
-            }
-        }
+        if (violations.contains(violation)) return;
 
         if (value != null) {
             throw new IllegalStateException("Cannot violate Result because Result already stated as successful");
         }
 
-        final Violation<E> violation = new Violation<>(violationValue);
         violations.add(violation);
     }
 
@@ -81,13 +72,13 @@ public class ResultBuilder<T> {
      * @param condition the condition of the violation,
      *                  true - violation
      *                  false - not violation
-     * @param violationValue the type of violation value
+     * @param violation the type of violation value
      */
-    public <E> void violateIf(boolean condition, E violationValue) {
-        Objects.requireNonNull(violationValue);
+    public <E extends Violation> void violateIf(boolean condition, E violation) {
+        Objects.requireNonNull(violation);
 
         if (condition) {
-            violate(violationValue);
+            violate(violation);
         }
     }
 
@@ -99,7 +90,7 @@ public class ResultBuilder<T> {
      *                  false - not violation
      * @param violationValue the type of violation value
      */
-    public <E> void violateIf(Supplier<Boolean> condition, E violationValue) {
+    public <E extends Violation> void violateIf(Supplier<Boolean> condition, E violationValue) {
         Objects.requireNonNull(violationValue);
         Objects.requireNonNull(condition);
 

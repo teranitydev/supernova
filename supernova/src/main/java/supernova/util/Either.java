@@ -1,6 +1,5 @@
 package supernova.util;
 
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -16,32 +15,32 @@ import java.util.stream.Stream;
  * @author Izhar Atharzi
  * @since 0.0.1
  */
-public class LegacyResult<T, E> {
+public class Either<T, E> {
 
     private final T reference;
     private final E violation;
 
     /**
-     * Returns {@link LegacyResult} containing succeed value reference.
+     * Returns {@link Either} containing succeed value reference.
      */
-    public static <T, E> LegacyResult<T, E> succeed(T reference) {
-        return new LegacyResult<>(reference, null);
+    public static <T, E> Either<T, E> succeed(T reference) {
+        return new Either<>(reference, null);
     }
 
     /**
-     * Returns {@link LegacyResult} containing fail violation value.
+     * Returns {@link Either} containing fail violation value.
      */
-    public static <T, E> LegacyResult<T, E> violation(E violation) {
-        return new LegacyResult<>(null, violation);
+    public static <T, E> Either<T, E> violation(E violation) {
+        return new Either<>(null, violation);
     }
 
     /**
-     * The default constructor of {@link LegacyResult} which only either
+     * The default constructor of {@link Either} which only either
      * {@link T} type or {@link E} type should be present.
      *
      * @throws IllegalStateException if both types are present
      */
-    private LegacyResult(T reference, E violation) {
+    private Either(T reference, E violation) {
         if (reference != null && violation != null || reference == null && violation == null)
             throw new IllegalStateException("only either one type can be present/empty");
 
@@ -68,14 +67,14 @@ public class LegacyResult<T, E> {
     }
 
     /**
-     * If {@link LegacyResult} is success then returns the reference, otherwise returns {@code other}.
+     * If {@link Either} is success then returns the reference, otherwise returns {@code other}.
      */
     public T orElse(T other) {
         return isSuccess() ? reference : other;
     }
 
     /**
-     * If {@link LegacyResult} is success then returns the reference, otherwise returns the reference produced
+     * If {@link Either} is success then returns the reference, otherwise returns the reference produced
      * by the supplying function.
      */
     public T orElse(Supplier<? extends T> supplier) {
@@ -83,24 +82,25 @@ public class LegacyResult<T, E> {
     }
 
     /**
-     * If {@link LegacyResult} is success then returns the reference, otherwise throw an exception
+     * If {@link Either} is success then returns the reference, otherwise throw an exception
      * if the violation type is an exception.
      */
-    public T orElseThrow() throws Exception {
+    public T orElseThrow() {
         if (isSuccess()) {
             return reference;
         } else {
-            if (violation instanceof Exception exception) {
-                throw exception;
+            if (violation instanceof RuntimeException throwable) {
+                throw throwable;
+            } else if (violation instanceof Throwable throwable) {
+                throw new RuntimeException(throwable);
             } else {
-                // throw new ViolationNotExceptionalException(violation);
-                throw new NoSuchElementException("violation is not an exception.");
+                throw new IllegalStateException("violation is not exception");
             }
         }
     }
 
     /**
-     * If {@link LegacyResult} is success then performs the given action with the reference, otherwise
+     * If {@link Either} is success then performs the given action with the reference, otherwise
      * perform nothing.
      */
     public void ifSuccess(Consumer<T> action) {
@@ -108,7 +108,7 @@ public class LegacyResult<T, E> {
     }
 
     /**
-     * If {@link LegacyResult} is failed then performs the given action with the violation, otherwise
+     * If {@link Either} is failed then performs the given action with the violation, otherwise
      * perform nothing.
      */
     public void ifViolation(Consumer<E> action) {
@@ -116,7 +116,7 @@ public class LegacyResult<T, E> {
     }
 
     /**
-     * If {@link LegacyResult} is success then returns {@link Stream} containing {@link T} reference.
+     * If {@link Either} is success then returns {@link Stream} containing {@link T} reference.
      */
     public Stream<T> stream() {
         if (isSuccess()) {
@@ -127,7 +127,7 @@ public class LegacyResult<T, E> {
     }
 
     /**
-     * If {@link LegacyResult} is failed then returns {@link Stream} containing {@link E} violation.
+     * If {@link Either} is failed then returns {@link Stream} containing {@link E} violation.
      */
     public Stream<E> streamViolation() {
         if (isSuccess()) {
@@ -149,8 +149,8 @@ public class LegacyResult<T, E> {
     public boolean equals(Object object) {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
-        LegacyResult<?, ?> result = (LegacyResult<?, ?>) object;
-        return Objects.equals(reference, result.reference) && Objects.equals(violation, result.violation);
+        Either<?, ?> either = (Either<?, ?>) object;
+        return Objects.equals(reference, either.reference) && Objects.equals(violation, either.violation);
     }
 
     @Override
@@ -160,7 +160,7 @@ public class LegacyResult<T, E> {
 
     @Override
     public String toString() {
-        return "LegacyResult{" +
+        return "Either{" +
                 "reference=" + reference +
                 ", violation=" + violation +
                 '}';

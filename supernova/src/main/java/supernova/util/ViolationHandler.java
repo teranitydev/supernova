@@ -1,6 +1,7 @@
 package supernova.util;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An abstract handler for processing violation.
@@ -19,20 +20,28 @@ public abstract class ViolationHandler {
      *
      * <p>Developers can change the handler anything they want.
      */
-    private static ViolationHandler HANDLER;
+    private static volatile ViolationHandler HANDLER;
+
+    public static void ignore() {
+        setHandler(new IgnoreViolationHandler());
+    }
 
     public static ViolationHandler getHandler() {
         if (HANDLER == null) {
-            HANDLER = new ExceptionViolationHandler();
+            synchronized (ViolationHandler.class) {
+                if (HANDLER == null) {
+                    HANDLER = new ExceptionViolationHandler();
+                }
+            }
         }
-
         return HANDLER;
     }
 
-    public static void setHandler(ViolationHandler HANDLER) {
-        ViolationHandler.HANDLER = HANDLER;
-    }
 
+    public static synchronized void setHandler(ViolationHandler handler) {
+        Objects.requireNonNull(handler, "handler cannot be null");
+        HANDLER = handler;
+    }
     /**
      * Handle a single violation.
      *

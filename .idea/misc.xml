@@ -10,6 +10,11 @@
     </option>
     <option name="ignoredFiles">
       <set>
+        <option value="$PROJECT_DIR$/experimental-api/pom.xml" />
+        <option value="$PROJECT_DIR$/experimental-plugin/pom.xml" />
+        <option value="$PROJECT_DIR$/supernova-gson/pom.xml" />
+        <option value="$PROJECT_DIR$/supernova-processor/pom.xml" />
+        <option value="$PROJECT_DIR$/supernova-redis-lettuce/pom.xml" />
         <option value="$PROJECT_DIR$/supernova-test/pom.xml" />
       </set>
     </option>

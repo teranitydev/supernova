@@ -6,18 +6,17 @@
 
     <groupId>net.teranity.supernova</groupId>
     <artifactId>supernova-parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
         <module>supernova</module>
-        <module>supernova-redis-lettuce</module>
-        <module>supernova-gson</module>
+        <module>supernova-experimental</module>
+        <module>supernova-example</module>
     </modules>
 
     <properties>
-        <maven.compiler.source>22</maven.compiler.source>
-        <maven.compiler.target>22</maven.compiler.target>
+        <maven.compiler.release>22</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

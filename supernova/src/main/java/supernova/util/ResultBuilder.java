@@ -23,29 +23,35 @@ public class ResultBuilder<T> {
      *
      * @param value the type of value
      */
-    public void value(T value) {
+    public ResultBuilder<T> value(T value) {
         this.value = value;
+
+        return this;
     }
 
     /**
      * Set new value if the condition is true.
      */
-    public void valueIf(boolean condition, T value) {
+    public ResultBuilder<T> valueIf(boolean condition, T value) {
         Objects.requireNonNull(value);
 
         if (condition) {
-            value(value);
+            return value(value);
         }
+
+        return this;
     }
 
     /**
      * Set new value if {@link Supplier} conditional check is true.
+     *
+     * @return builder
      */
-    public void valueIf(Supplier<Boolean> condition, T value) {
+    public ResultBuilder<T> valueIf(Supplier<Boolean> condition, T value) {
         Objects.requireNonNull(value);
         Objects.requireNonNull(condition);
 
-        valueIf(condition.get(), value);
+        return valueIf(condition.get(), value);
     }
 
     /**
@@ -53,17 +59,16 @@ public class ResultBuilder<T> {
      * is failed.
      *
      * @param violation the type of violation value
+     * @return builder
      */
-    public <E extends Violation> void violate(E violation) {
+    public <E extends Violation> ResultBuilder<T> violate(E violation) {
         Objects.requireNonNull(violation);
 
-        if (violations.contains(violation)) return;
-
-        if (value != null) {
-            throw new IllegalStateException("Cannot violate Result because Result already stated as successful");
-        }
+        if (violations.contains(violation)) return this;
 
         violations.add(violation);
+
+        return this;
     }
 
     /**
@@ -73,13 +78,16 @@ public class ResultBuilder<T> {
      *                  true - violation
      *                  false - not violation
      * @param violation the type of violation value
+     * @return builder
      */
-    public <E extends Violation> void violateIf(boolean condition, E violation) {
+    public <E extends Violation> ResultBuilder<T> violateIf(boolean condition, E violation) {
         Objects.requireNonNull(violation);
 
         if (condition) {
-            violate(violation);
+            return violate(violation);
         }
+
+        return this;
     }
 
     /**
@@ -89,18 +97,27 @@ public class ResultBuilder<T> {
      *                  true - violation
      *                  false - not violation
      * @param violationValue the type of violation value
+     * @return builder
      */
-    public <E extends Violation> void violateIf(Supplier<Boolean> condition, E violationValue) {
+    public <E extends Violation> ResultBuilder<T> violateIf(Supplier<Boolean> condition, E violationValue) {
         Objects.requireNonNull(violationValue);
         Objects.requireNonNull(condition);
 
-        violateIf(condition.get(), violationValue);
+        return violateIf(condition.get(), violationValue);
     }
 
     /**
      * Build the {@link Result} and returns the Result
      */
     public Result<T> build() {
+        if (violations.isEmpty() && value == null) {
+            throw new IllegalStateException("Cannot build Result because both violations and value are empty");
+        }
+
+        if (!violations.isEmpty() && value != null) {
+            throw new IllegalStateException("Cannot build Result because both violations and value are exists, Result is meant to be one-state container");
+        }
+
         return Result.of(value, violations);
     }
 }

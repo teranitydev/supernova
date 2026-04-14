@@ -2,6 +2,8 @@ package supernova.util;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -13,7 +15,7 @@ import java.util.stream.Stream;
  * <p>Developers also can create builder of {@link Result} by using {@code Result.builder()}
  * and returns {@link ResultBuilder}
  *
- * <p>If {@link Result} have violation(s) it means operation is succeeded,
+ * <p>If {@link Result} does not have violation(s) it means operation is succeeded,
  * otherwise, if {@link Result} have violation(s) it means operation is failed.
  *
  * <p>Success {@link Result} would require NO violations at all, and can have nullable value.
@@ -78,7 +80,6 @@ public class Result<T> {
         return violations(List.of(violation));
     }
 
-    @SafeVarargs
     public static <T> Result<T> violations(Violation... violations) {
         return violations(Arrays.asList(violations));
     }
@@ -102,6 +103,11 @@ public class Result<T> {
         return new ResultBuilder<>(new ArrayList<>(), null);
     }
 
+    public static ResultCollector combine(Result<?>... results) {
+        Collection<Result<?>> collection = List.of(results);
+        return new ResultCollector(collection);
+    }
+
     /**
      * Checks if the {@link Result} is succeeded.
      * <p>
@@ -123,15 +129,17 @@ public class Result<T> {
     /**
      * Check if the {@link Result} containing specific violation that given to the param.
      *
-     * @param violationValue the type of the violation value
+     * @param violation the violation
      * @return Returns {@code true} if it's contains {@code E}, otherwise {@code false}
      */
-    public boolean containsViolation(Object violationValue) {
-        Objects.requireNonNull(violationValue);
+    public boolean containsViolation(Violation violation) {
+        Objects.requireNonNull(violation);
+        return violations.contains(violation);
+    }
 
-        if (violations.isEmpty()) return false;
-
-        return violations.stream().anyMatch(violation -> violation.equals(violationValue));
+    public boolean containsViolation(Predicate<Violation> predicate) {
+        Objects.requireNonNull(predicate);
+        return violations.stream().anyMatch(predicate);
     }
 
     /**
@@ -173,17 +181,19 @@ public class Result<T> {
     }
 
     /**
-     * If the {@link Result} is success then returns {@code T}, otherwise throws
-     * {@link IllegalStateException}
+     * If the {@link Result} is success then returns {@code T}, otherwise
+     * process the violation(s)
      *
      * @return the value
      */
     public T get() {
-        if (!isSuccessful()) {
-            process();
-            return null;
-        }
-        return value;
+        if (isSuccessful()) return value;
+
+        process();
+
+        throw new ViolationException(
+                "Result contains violations: " + violations
+        );
     }
 
     /**
@@ -207,6 +217,34 @@ public class Result<T> {
      */
     public List<Violation> getViolations() {
         return Collections.unmodifiableList(violations);
+    }
+
+    public <R> Result<R> map(Function<? super T, ? extends R> mapper) {
+        Objects.requireNonNull(mapper, "mapper cannot be null");
+
+        if (hasViolations()) {
+            return Result.violations(violations);
+        }
+
+        try {
+            return Result.success(mapper.apply(value));
+        } catch (Exception e) {
+            return Result.violation(e::getMessage);
+        }
+    }
+
+    public <R> Result<R> flatMap(Function<? super T, Result<R>> mapper) {
+        Objects.requireNonNull(mapper, "mapper cannot be null");
+
+        if (hasViolations()) {
+            return Result.violations(violations);
+        }
+
+        try {
+            return Objects.requireNonNull(mapper.apply(value));
+        } catch (Exception e) {
+            return Result.violations(e::getMessage);
+        }
     }
 
     private void process() {

@@ -1,13 +1,12 @@
 package ne.teranity.example;
 
-// import supernova.experimental.EnableExperimental;
+import supernova.experimental.EnableExperimental;
 import supernova.experimental.TestFeature;
 
-// @EnableExperimental
+@EnableExperimental
 public class ExperimentalUsageExample {
 
     public static void main(String[] args) {
-        // this should fail
         TestFeature.print();
     }
 }

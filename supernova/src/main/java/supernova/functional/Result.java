@@ -7,6 +7,9 @@ import java.util.function.Consumer;
  * An immutable container that may or may not contain a {@code null}able value and zero or more violation.
  * A result that have no violations is stated as successful; otherwise it is stated as violated.
  *
+ * <p>A result also can have warnings which don't cause any fatal errors for the operation but is important
+ * enough to worth knowing.</p>
+ *
  * <p>A violated result is also can be interpreted as failed operation. It has the same meaning as error.
  * but violation will always contain error field and error message.</p>
  *
@@ -32,14 +35,20 @@ public class Result<T> {
     private final Collection<Violation> violations;
 
     /**
+     * Collections of warnings
+     */
+    private final Collection<Warning> warnings;
+
+    /**
      * Constructs an instance with value and violations.
      *
      * @param value The value of the result
      * @param violations Collection of violations; if null, it is treated as an empty collection.
      */
-    private Result(T value, Collection<Violation> violations) {
+    private Result(T value, Collection<Violation> violations, Collection<Warning> warnings) {
         this.value = value;
         this.violations = List.copyOf(violations);
+        this.warnings = List.copyOf(warnings);
     }
 
     /**
@@ -50,7 +59,7 @@ public class Result<T> {
      * @param <T> The type of value
      */
     public static <T> Result<T> successful(T value) {
-        return new Result<>(value, Collections.emptyList());
+        return new Result<>(value, Collections.emptyList(), Collections.emptyList());
     }
 
     /**
@@ -59,7 +68,7 @@ public class Result<T> {
      * @return a successful {@link Result} for void type
      */
     public static Result<Void> successful() {
-        return new Result<>(null, Collections.emptyList());
+        return new Result<>(null, Collections.emptyList(), Collections.emptyList());
     }
 
     /**
@@ -70,7 +79,11 @@ public class Result<T> {
      * @param <T> The type of value
      */
     public static <T> Result<T> violated(List<Violation> violations) {
-        return new Result<>(null, Collections.unmodifiableCollection(violations));
+        return new Result<>(
+                null,
+                Collections.unmodifiableCollection(violations),
+                Collections.emptyList()
+        );
     }
 
     /**
@@ -95,8 +108,11 @@ public class Result<T> {
         return violated(List.of(violation));
     }
 
-    public static <T> Result<T> of(T value, List<Violation> violations) {
-        return new Result<>(value, violations);
+    /**
+     * Creates a result with all the params.
+     */
+    public static <T> Result<T> of(T value, List<Violation> violations, List<Warning> warnings) {
+        return new Result<>(value, violations, warnings);
     }
 
     /**
@@ -118,6 +134,15 @@ public class Result<T> {
     }
 
     /**
+     * Checks if the result have warnings.
+     *
+     * @return {@code true} if the result contains warnings.
+     */
+    public boolean hasWarning() {
+        return !warnings.isEmpty();
+    }
+
+    /**
      * If result is successful then performs the given action with the reference, otherwise
      * perform nothing.
      */
@@ -136,6 +161,18 @@ public class Result<T> {
     public Result<T> whenViolated(Consumer<Collection<Violation>> action) {
         if (isViolated()) {
             action.accept(violations);
+        }
+
+        return this;
+    }
+
+    /**
+     * If result have warning then performs the given action with the warnings, otherwise
+     * perform nothing.
+     */
+    public Result<T> whenWarning(Consumer<Collection<Warning>> action) {
+        if (hasWarning()) {
+            action.accept(warnings);
         }
 
         return this;
@@ -174,5 +211,14 @@ public class Result<T> {
      */
     public Collection<Violation> violations() {
         return violations;
+    }
+
+    /**
+     * Gets a collection of warnings.
+     *
+     * @return Unmodifiable collection of warnings
+     */
+    public Collection<Warning> warnings() {
+        return warnings;
     }
 }

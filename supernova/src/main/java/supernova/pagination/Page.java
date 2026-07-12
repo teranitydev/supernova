@@ -19,6 +19,14 @@ public interface Page<E> {
     int pageNumber();
 
     /**
+     * Add element into the page list.
+     *
+     * @param element The element
+     * @return {@code true} if the operation is success
+     */
+    boolean add(E element);
+
+    /**
      * Returns the elements contained in this page.
      *
      * @return List of elements

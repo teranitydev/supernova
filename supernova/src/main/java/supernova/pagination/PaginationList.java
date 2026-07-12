@@ -68,8 +68,7 @@ public class PaginationList<E> implements Pagination<E> {
             page = addPage();
         }
 
-        page.values().add(element);
-        return true;
+        return page.add(element);
     }
 
     /**
@@ -168,6 +167,11 @@ public class PaginationList<E> implements Pagination<E> {
         @Override
         public int pageNumber() {
             return pageNumber;
+        }
+
+        @Override
+        public boolean add(E element) {
+            return list.add(element);
         }
 
         @Override

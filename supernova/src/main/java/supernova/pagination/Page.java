@@ -3,7 +3,7 @@ package supernova.pagination;
 import java.util.List;
 
 /**
- * Represents a single page within a {@link PaginationList}.
+ * Represents a single page.
  *
  * @param <E> the type of elements contained in the page
  * @author Izhar Atharzi

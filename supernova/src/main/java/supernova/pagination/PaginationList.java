@@ -1,7 +1,11 @@
 package supernova.pagination;
 
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 
+@ApiStatus.Experimental
 public class PaginationList<E> implements Pagination<E> {
 
     /**
@@ -126,7 +130,7 @@ public class PaginationList<E> implements Pagination<E> {
     }
 
     @Override
-    public Page<E> getLast() {
+    public @NotNull Page<E> getLast() {
         return pages.getLast();
     }
 

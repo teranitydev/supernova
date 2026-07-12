@@ -176,7 +176,7 @@ public class PaginationList<E> implements Pagination<E> {
 
         @Override
         public List<E> values() {
-            return list;
+            return Collections.unmodifiableList(list);
         }
 
         @Override

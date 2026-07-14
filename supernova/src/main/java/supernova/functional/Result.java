@@ -8,7 +8,7 @@ import java.util.function.Consumer;
  * A result that have no violations is stated as successful; otherwise it is stated as violated.
  *
  * <p>A result also can have warnings which don't cause any fatal errors for the operation but is important
- * enough to worth knowing.</p>
+ * enough to worth knowing. Warnings can only be add in {@link ResultBuilder}.</p>
  *
  * <p>A violated result is also can be interpreted as failed operation. It has the same meaning as error.
  * but violation will always contain error field and error message.</p>
@@ -49,6 +49,16 @@ public class Result<T> {
         this.value = value;
         this.violations = List.copyOf(violations);
         this.warnings = List.copyOf(warnings);
+    }
+
+    /**
+     * Creates a {@link Result} builder.
+     *
+     * @return a Result builder
+     * @param <T> the type of value
+     */
+    public static <T> ResultBuilder<T> builder() {
+        return new ResultBuilder<>();
     }
 
     /**

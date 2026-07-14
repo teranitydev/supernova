@@ -1,5 +1,7 @@
 package supernova.pagination;
 
+import supernova.annotations.Concept;
+
 import java.util.List;
 
 /**
@@ -9,6 +11,7 @@ import java.util.List;
  * @author Izhar Atharzi
  * @since 1.0.0
  */
+@Concept
 public interface Page<E> {
 
     /**

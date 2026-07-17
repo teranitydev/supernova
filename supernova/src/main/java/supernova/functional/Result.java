@@ -2,6 +2,7 @@ package supernova.functional;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * An immutable container that may or may not contain a {@code null}able value and zero or more violation.
@@ -281,6 +282,22 @@ public class Result<T> {
             return defaultValue;
         }
         return value;
+    }
+
+    /**
+     * Returns a sequential {@link Stream} containing the value if this result is
+     * successful. Otherwise, returns an empty stream.
+     *
+     * <p>If this result is successful and its value is {@code null}, an empty
+     * stream is returned.
+     *
+     * @return a stream containing the value if this result is successful and
+     *         non-{@code null}; otherwise an empty stream
+     */
+    public Stream<T> stream() {
+        return isSuccessful()
+                ? Stream.ofNullable(value)
+                : Stream.empty();
     }
 
     /**

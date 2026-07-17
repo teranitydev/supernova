@@ -8,7 +8,7 @@ import java.util.function.Consumer;
  * A result that have no violations is stated as successful; otherwise it is stated as violated.
  *
  * <p>A result also can have warnings which don't cause any fatal errors for the operation but is important
- * enough to worth knowing. Warnings can only be add in {@link ResultBuilder}.</p>
+ * enough to worth knowing. Warnings can only be added in {@link ResultBuilder}.</p>
  *
  * <p>A violated result is also can be interpreted as failed operation. It has the same meaning as error.
  * but violation will always contain error field and error message.</p>
@@ -72,6 +72,18 @@ public class Result<T> {
         return new Result<>(value, Collections.emptyList(), Collections.emptyList());
     }
 
+    public static <T> Result<T> successful(T value, Warning warning) {
+        return new Result<>(value, Collections.emptyList(), List.of(warning));
+    }
+
+    public static <T> Result<T> successful(T value, Warning... warnings) {
+        return new Result<>(value, Collections.emptyList(), List.of(warnings));
+    }
+
+    public static <T> Result<T> successful(T value, List<Warning> warnings) {
+        return new Result<>(value, Collections.emptyList(), warnings);
+    }
+
     /**
      * Returns a successful {@link Result} for void type.
      *
@@ -79,6 +91,18 @@ public class Result<T> {
      */
     public static Result<Void> successful() {
         return new Result<>(null, Collections.emptyList(), Collections.emptyList());
+    }
+
+    public static <T> Result<T> successful(Warning warning) {
+        return new Result<>(null, Collections.emptyList(), List.of(warning));
+    }
+
+    public static <T> Result<T> successful(Warning... warnings) {
+        return new Result<>(null, Collections.emptyList(), List.of(warnings));
+    }
+
+    public static <T> Result<T> successful(List<Warning> warnings) {
+        return new Result<>(null, Collections.emptyList(), warnings);
     }
 
     /**

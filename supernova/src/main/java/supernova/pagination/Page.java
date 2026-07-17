@@ -14,7 +14,7 @@ import java.util.List;
  * @param <E> the type of elements contained in this page
  *
  * @author Izhar Atharzi
- * @since 1.0.0
+ * @since 1.1.1
  */
 @Concept
 public interface Page<E> extends List<E> {

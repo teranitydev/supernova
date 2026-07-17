@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  * <p>Violation represent as error and can contain any type of object such as string, integer, custom
  * object, etc.</p>
  *
- * @param <T> The type of the contained value.
+ * @param <T> the type of the contained value.
  * @author Izhar Atharzi
  * @since 1.0.0
  */
@@ -42,8 +42,8 @@ public class Result<T> {
     /**
      * Constructs an instance with value and violations.
      *
-     * @param value The value of the result
-     * @param violations Collection of violations; if null, it is treated as an empty collection.
+     * @param value the value of the result
+     * @param violations collection of violations; if null, it is treated as an empty collection.
      */
     private Result(T value, Collection<Violation> violations, Collection<Warning> warnings) {
         this.value = value;
@@ -66,20 +66,44 @@ public class Result<T> {
      *
      * @param value The value
      * @return a successful {@link Result} with the value
-     * @param <T> The type of value
+     * @param <T> the type of value
      */
     public static <T> Result<T> successful(T value) {
         return new Result<>(value, Collections.emptyList(), Collections.emptyList());
     }
 
+    /**
+     * Returns a successful {@link Result} with a value and a warning.
+     *
+     * @param value the object of the value
+     * @param warning the instance of the warning
+     * @return a successful {@link Result} with a value and a warning
+     * @param <T> the type of value
+     */
     public static <T> Result<T> successful(T value, Warning warning) {
         return new Result<>(value, Collections.emptyList(), List.of(warning));
     }
 
+    /**
+     * Returns a successful {@link Result} with a value and warnings.
+     *
+     * @param value the object of the value
+     * @param warnings list of warnings
+     * @return a successful {@link Result} with a value and a warning
+     * @param <T> the type of value
+     */
     public static <T> Result<T> successful(T value, Warning... warnings) {
         return new Result<>(value, Collections.emptyList(), List.of(warnings));
     }
 
+    /**
+     * Returns a successful {@link Result} with a value and list of warnings.
+     *
+     * @param value the object of the value
+     * @param warnings list of warnings
+     * @return a successful {@link Result} with a value and a warning
+     * @param <T> the type of value
+     */
     public static <T> Result<T> successful(T value, List<Warning> warnings) {
         return new Result<>(value, Collections.emptyList(), warnings);
     }
@@ -93,14 +117,35 @@ public class Result<T> {
         return new Result<>(null, Collections.emptyList(), Collections.emptyList());
     }
 
+    /**
+     * Returns a successful {@link Result} for void type with a warning.
+     *
+     * @param warning the instance of the warning
+     * @return a successful {@link Result}
+     * @param <T> the type of the value
+     */
     public static <T> Result<T> successful(Warning warning) {
         return new Result<>(null, Collections.emptyList(), List.of(warning));
     }
 
+    /**
+     * Returns a successful {@link Result} for void type with warnings.
+     *
+     * @param warnings list of warnings
+     * @return a successful {@link Result}
+     * @param <T> the type of the value
+     */
     public static <T> Result<T> successful(Warning... warnings) {
         return new Result<>(null, Collections.emptyList(), List.of(warnings));
     }
 
+    /**
+     * Returns a successful {@link Result} for void type with list of warnings.
+     *
+     * @param warnings list of warnings
+     * @return a successful {@link Result}
+     * @param <T> the type of the value
+     */
     public static <T> Result<T> successful(List<Warning> warnings) {
         return new Result<>(null, Collections.emptyList(), warnings);
     }
@@ -108,9 +153,9 @@ public class Result<T> {
     /**
      * Returns violated {@link Result} with collection of violations.
      *
-     * @param violations List of violations
-     * @return Violated {@link Result} with collection of violations
-     * @param <T> The type of value
+     * @param violations list of violations
+     * @return violated {@link Result} with collection of violations
+     * @param <T> the type of value
      */
     public static <T> Result<T> violated(List<Violation> violations) {
         return new Result<>(
@@ -123,9 +168,9 @@ public class Result<T> {
     /**
      * Returns violated {@link Result} with collection of violations.
      *
-     * @param violations List of violations
-     * @return Violated {@link Result} with collection of violations.
-     * @param <T> The type of value
+     * @param violations list of violations
+     * @return violated {@link Result} with collection of violations.
+     * @param <T> the type of value
      */
     public static <T> Result<T> violated(Violation... violations) {
         return violated(List.of(violations));
@@ -134,9 +179,9 @@ public class Result<T> {
     /**
      * Returns violated {@link Result} with single violation.
      *
-     * @param violation A violation
-     * @return Violated {@link Result} with single violation.
-     * @param <T> The type of value
+     * @param violation a violation
+     * @return violated {@link Result} with single violation.
+     * @param <T> the type of value
      */
     public static <T> Result<T> violated(Violation violation) {
         return violated(List.of(violation));
@@ -216,7 +261,7 @@ public class Result<T> {
      * If the result is successful returns the value.
      *
      * @throws ViolatedException if the result is violated
-     * @return The instance of the value
+     * @return the instance of the value
      */
     public T get() {
         if (isViolated()) {
@@ -228,8 +273,8 @@ public class Result<T> {
     /**
      * If the result is successful returns the value, otherwise returns the default value.
      *
-     * @param defaultValue The instance of the default value
-     * @return The value if the result is successful or default value if violated
+     * @param defaultValue the instance of the default value
+     * @return the value if the result is successful or default value if violated
      */
     public T getOrElse(T defaultValue) {
         if (isViolated()) {
@@ -241,7 +286,7 @@ public class Result<T> {
     /**
      * Gets a collection of violations.
      *
-     * @return Unmodifiable collection of violations
+     * @return unmodifiable collection of violations
      */
     public Collection<Violation> violations() {
         return violations;
@@ -250,7 +295,7 @@ public class Result<T> {
     /**
      * Gets a collection of warnings.
      *
-     * @return Unmodifiable collection of warnings
+     * @return unmodifiable collection of warnings
      */
     public Collection<Warning> warnings() {
         return warnings;

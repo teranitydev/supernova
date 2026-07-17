@@ -56,7 +56,7 @@ public class Violation {
      *
      * <p>It could be anything, e.g. "ACCOUNT_NOT_FOUND" or 404.</p>
      *
-     * @return Violation code
+     * @return violation code
      */
     public String getCode() {
         return code;
@@ -65,7 +65,7 @@ public class Violation {
     /**
      * Gets the message of the violation.
      *
-     * @return Violation message
+     * @return violation message
      */
     public String getMessage() {
         return message;
@@ -74,7 +74,7 @@ public class Violation {
     /**
      * Gets a nullable object of the violation that might have to hold, e.g. Exception/Throwable.
      *
-     * @return Violation object.
+     * @return violation object.
      */
     public Object getObject() {
         return object;

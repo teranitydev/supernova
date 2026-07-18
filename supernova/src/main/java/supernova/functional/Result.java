@@ -256,7 +256,7 @@ public class Result<T> {
      * perform nothing.
      */
     public Result<T> whenSuccessful(Consumer<? super T> action) {
-        if (isSuccessful()) {
+        if (violations.isEmpty()) {
             action.accept(value);
         }
 
@@ -268,7 +268,7 @@ public class Result<T> {
      * perform nothing.
      */
     public Result<T> whenViolated(Consumer<Collection<Violation>> action) {
-        if (isViolated()) {
+        if (!violations.isEmpty()) {
             action.accept(violations);
         }
 
@@ -280,7 +280,7 @@ public class Result<T> {
      * perform nothing.
      */
     public Result<T> whenWarning(Consumer<Collection<Warning>> action) {
-        if (hasWarning()) {
+        if (!warnings.isEmpty()) {
             action.accept(warnings);
         }
 
@@ -294,7 +294,7 @@ public class Result<T> {
      * @return the instance of the value
      */
     public T get() {
-        if (isViolated()) {
+        if (!violations.isEmpty()) {
             throw new ViolatedException(violations);
         }
         return value;
@@ -307,7 +307,7 @@ public class Result<T> {
      * @return the value if the result is successful or default value if violated
      */
     public T getOrElse(T defaultValue) {
-        if (isViolated()) {
+        if (!violations.isEmpty()) {
             return defaultValue;
         }
         return value;
@@ -324,7 +324,7 @@ public class Result<T> {
      *         non-{@code null}; otherwise an empty stream
      */
     public Stream<T> stream() {
-        return isSuccessful()
+        return violations.isEmpty()
                 ? Stream.ofNullable(value)
                 : Stream.empty();
     }

@@ -9,12 +9,12 @@ import java.util.stream.Stream;
  * A result that have no violations is stated as successful; otherwise it is stated as violated.
  *
  * <p>A result also can have warnings which don't cause any fatal errors for the operation but is important
- * enough to worth knowing. Warnings can only be added in {@link ResultBuilder}.</p>
+ * enough to worth knowing.</p>
  *
  * <p>A violated result is also can be interpreted as failed operation. It has the same meaning as error.
  * but violation will always contain error field and error message.</p>
  *
- * <p>A successful result may still contain a {@code null} value.</p
+ * <p>A successful result may still contain a {@code null} value.</p>
  *
  * <p>Violation represent as error and can contain any type of object such as string, integer, custom
  * object, etc.</p>
@@ -26,6 +26,21 @@ import java.util.stream.Stream;
 public class Result<T> {
 
     /**
+     * Common instance for empty violation collection.
+     */
+    private static final List<Violation> EMPTY_VIOLATIONS = Collections.emptyList();
+
+    /**
+     * Common instance for empty warning collection.
+     */
+    private static final List<Warning> EMPTY_WARNINGS = Collections.emptyList();
+
+    /**
+     * Common instance for {@code successful()}.
+     */
+    private static final Result<Void> EMPTY_SUCCESSFUL = new Result<>(null, EMPTY_VIOLATIONS, EMPTY_WARNINGS);
+
+    /**
      * Nullable value which does not trigger anything in result.
      */
     private final T value;
@@ -33,12 +48,23 @@ public class Result<T> {
     /**
      * Collection of violations; if empty, state as successful.
      */
-    private final Collection<Violation> violations;
+    private final List<Violation> violations;
 
     /**
      * Collections of warnings
      */
-    private final Collection<Warning> warnings;
+    private final List<Warning> warnings;
+
+    /**
+     * A common helper for creating a singleton list.
+     *
+     * @param element the instance of the element
+     * @return singleton list
+     * @param <E> the type of the element
+     */
+    private static <E> List<E> singleton(E element) {
+        return Collections.singletonList(element);
+    }
 
     /**
      * Constructs an instance with value and violations.
@@ -46,10 +72,16 @@ public class Result<T> {
      * @param value the value of the result
      * @param violations collection of violations; if null, it is treated as an empty collection.
      */
-    private Result(T value, Collection<Violation> violations, Collection<Warning> warnings) {
+    private Result(T value, List<Violation> violations, List<Warning> warnings) {
         this.value = value;
-        this.violations = List.copyOf(violations);
-        this.warnings = List.copyOf(warnings);
+
+        this.violations = violations == null || violations.isEmpty()
+                ? EMPTY_VIOLATIONS
+                : List.copyOf(violations);
+
+        this.warnings = warnings == null || warnings.isEmpty()
+                ? EMPTY_WARNINGS
+                : List.copyOf(warnings);
     }
 
     /**
@@ -70,7 +102,7 @@ public class Result<T> {
      * @param <T> the type of value
      */
     public static <T> Result<T> successful(T value) {
-        return new Result<>(value, Collections.emptyList(), Collections.emptyList());
+        return new Result<>(value, EMPTY_VIOLATIONS, EMPTY_WARNINGS);
     }
 
     /**
@@ -82,7 +114,7 @@ public class Result<T> {
      * @param <T> the type of value
      */
     public static <T> Result<T> successful(T value, Warning warning) {
-        return new Result<>(value, Collections.emptyList(), List.of(warning));
+        return new Result<>(value, EMPTY_VIOLATIONS, singleton(warning));
     }
 
     /**
@@ -94,7 +126,7 @@ public class Result<T> {
      * @param <T> the type of value
      */
     public static <T> Result<T> successful(T value, Warning... warnings) {
-        return new Result<>(value, Collections.emptyList(), List.of(warnings));
+        return new Result<>(value, EMPTY_VIOLATIONS, List.of(warnings));
     }
 
     /**
@@ -106,7 +138,7 @@ public class Result<T> {
      * @param <T> the type of value
      */
     public static <T> Result<T> successful(T value, List<Warning> warnings) {
-        return new Result<>(value, Collections.emptyList(), warnings);
+        return new Result<>(value, EMPTY_VIOLATIONS, warnings);
     }
 
     /**
@@ -115,7 +147,7 @@ public class Result<T> {
      * @return a successful {@link Result} for void type
      */
     public static Result<Void> successful() {
-        return new Result<>(null, Collections.emptyList(), Collections.emptyList());
+        return EMPTY_SUCCESSFUL;
     }
 
     /**
@@ -123,10 +155,9 @@ public class Result<T> {
      *
      * @param warning the instance of the warning
      * @return a successful {@link Result}
-     * @param <T> the type of the value
      */
-    public static <T> Result<T> successful(Warning warning) {
-        return new Result<>(null, Collections.emptyList(), List.of(warning));
+    public static Result<Void> successful(Warning warning) {
+        return new Result<>(null, EMPTY_VIOLATIONS, singleton(warning));
     }
 
     /**
@@ -134,10 +165,9 @@ public class Result<T> {
      *
      * @param warnings list of warnings
      * @return a successful {@link Result}
-     * @param <T> the type of the value
      */
-    public static <T> Result<T> successful(Warning... warnings) {
-        return new Result<>(null, Collections.emptyList(), List.of(warnings));
+    public static Result<Void> successful(Warning... warnings) {
+        return new Result<>(null, EMPTY_VIOLATIONS, List.of(warnings));
     }
 
     /**
@@ -145,10 +175,9 @@ public class Result<T> {
      *
      * @param warnings list of warnings
      * @return a successful {@link Result}
-     * @param <T> the type of the value
      */
-    public static <T> Result<T> successful(List<Warning> warnings) {
-        return new Result<>(null, Collections.emptyList(), warnings);
+    public static Result<Void> successful(List<Warning> warnings) {
+        return new Result<>(null, EMPTY_VIOLATIONS, warnings);
     }
 
     /**
@@ -162,7 +191,7 @@ public class Result<T> {
         return new Result<>(
                 null,
                 violations,
-                Collections.emptyList()
+                EMPTY_WARNINGS
         );
     }
 
@@ -185,7 +214,7 @@ public class Result<T> {
      * @param <T> the type of value
      */
     public static <T> Result<T> violated(Violation violation) {
-        return violated(List.of(violation));
+        return violated(singleton(violation));
     }
 
     /**
@@ -305,7 +334,7 @@ public class Result<T> {
      *
      * @return unmodifiable collection of violations
      */
-    public Collection<Violation> violations() {
+    public List<Violation> violations() {
         return violations;
     }
 
@@ -314,7 +343,7 @@ public class Result<T> {
      *
      * @return unmodifiable collection of warnings
      */
-    public Collection<Warning> warnings() {
+    public List<Warning> warnings() {
         return warnings;
     }
 }

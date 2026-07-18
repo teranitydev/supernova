@@ -252,6 +252,17 @@ public class Result<T> {
     }
 
     /**
+     * Checks if the result has violation specified by the violation code.
+     *
+     * @param code the violation code
+     * @return {@code true} if there is a violation specified by the code
+     */
+    public boolean containsViolation(String code) {
+        return violations.stream().anyMatch(violation ->
+                violation.getCode().equals(code));
+    }
+
+    /**
      * If result is successful then performs the given action with the reference, otherwise
      * perform nothing.
      */
@@ -345,5 +356,43 @@ public class Result<T> {
      */
     public List<Warning> warnings() {
         return warnings;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Result<?> other)) {
+            return false;
+        }
+
+        return Objects.equals(value, other.value)
+                && Objects.equals(violations, other.violations);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value, violations);
+    }
+
+    @Override
+    public String toString() {
+        StringJoiner joiner = new StringJoiner(", ", "Result[", "]");
+
+        if (value != null) {
+            joiner.add("value=" + value);
+        }
+
+        if (!violations.isEmpty()) {
+            joiner.add("violations=" + violations);
+        }
+
+        if (!warnings.isEmpty()) {
+            joiner.add("warnings=" + warnings);
+        }
+
+        return joiner.toString();
     }
 }
